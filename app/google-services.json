@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "403287196371",
+    "firebase_url": "https://atomictweets-fcf18.firebaseio.com",
+    "project_id": "atomictweets-fcf18",
+    "storage_bucket": "atomictweets-fcf18.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:403287196371:android:d0be5d8d4605408e",
+        "android_client_info": {
+          "package_name": "com.fredericborrel.atomictweets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "403287196371-po37a21uea0a03tqbuuk8340djaqaf7t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXimP0-F3Pcu4LNeTob22JWBRGo7a5PxY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
