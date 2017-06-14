@@ -46,7 +46,7 @@
             android:text="@string/auth_developped_by"
             android:textSize="@dimen/tv_auth_developped_by_text_size"/>
 
-        <com.google.android.gms.common.SignInButton
+        <com.twitter.sdk.android.core.identity.TwitterLoginButton
             android:id="@+id/sign_in_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bt_auth_height"

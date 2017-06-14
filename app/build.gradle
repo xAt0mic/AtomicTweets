@@ -29,10 +29,10 @@ dependencies {
     final RETROFIT_VERSION = '2.1.0'
 
     compile "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
-    compile "com.google.android.gms:play-services-auth:$PLAY_SERVICES_VERSION"
     compile "com.google.firebase:firebase-auth:$PLAY_SERVICES_VERSION"
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
     compile "com.squareup.retrofit2:converter-gson:$RETROFIT_VERSION"
+    compile 'com.twitter.sdk.android:twitter-core:3.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
