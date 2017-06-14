@@ -13,4 +13,8 @@
     <dimen name="tv_auth_welcome_text_size">24sp</dimen>
     <dimen name="tv_auth_developped_by_text_size">10sp</dimen>
 
+    <!-- Menu -->
+    <dimen name="header_menu_height">180dp</dimen>
+    <dimen name="iv_profile_size">76dp</dimen>
+
 </resources>

@@ -12,4 +12,11 @@
     <!-- Do not like to put Keys like that, but done this way for time sake -->
     <string name="com.twitter.sdk.android.CONSUMER_KEY">SlxIi97nBEC5MEKRLUfH6BhSy</string>
     <string name="com.twitter.sdk.android.CONSUMER_SECRET">LWLhdQJ6dfPQCy5v4hvS0JxKeaJhlVIbqcx1fsTuvGxEui1tdh</string>
+
+    <!-- Menu -->
+    <string name="menu_tweets">Tweets</string>
+    <string name="menu_sign_out">Sign Out</string>
+    <string name="menu_open">Open navigation drawer</string>
+    <string name="menu_close">Close navigation drawer</string>
+
 </resources>
