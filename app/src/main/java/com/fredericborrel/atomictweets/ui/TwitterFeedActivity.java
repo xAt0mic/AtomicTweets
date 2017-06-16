@@ -64,7 +64,7 @@ public class TwitterFeedActivity extends AppCompatActivity implements
         // Setup
         initDrawer();
         initRefreshListener();
-        setTwitterTimeline(DEFAULT_QUERY);
+        initTwitterTimeline();
         initSearchView();
         initActionBar();
 
@@ -171,9 +171,13 @@ public class TwitterFeedActivity extends AppCompatActivity implements
         actionBar.setHomeButtonEnabled(true);
     }
 
+    private void initTwitterTimeline() {
+        mBinding.lvTweets.setEmptyView(mBinding.tvNoTweets);
+        setTwitterTimeline(DEFAULT_QUERY);
+    }
+
     // No way to update dataset, so unfortunately, for time sake, I have to reinstantiate
-    // a timeline and an adapter. I also have no control over the emptiness of the listview
-    // or when the data is actually loaded.
+    // a timeline and an adapter. I also do not know if the data is actually loaded.
     private void setTwitterTimeline(String query) {
         if (NetworkUtils.isNetworkAvailable(this)) {
             mTimeline = new SearchTimeline.Builder()
@@ -184,6 +188,7 @@ public class TwitterFeedActivity extends AppCompatActivity implements
             mAdapter = new TweetTimelineListAdapter.Builder(this)
                     .setTimeline(mTimeline)
                     .build();
+
             mBinding.lvTweets.setAdapter(mAdapter);
         } else {
             Toast.makeText(this, getString(R.string.feed_network_not_available), Toast.LENGTH_LONG).show();

@@ -23,6 +23,6 @@
     <!-- Feed -->
     <string name="feed_network_not_available">Oops, we cannot reach Twitter. Please check your internet connection.</string>
     <string name="feed_unexpected_error">Oops, something went wrong.</string>
-    <string name="feed_no_internet">No internet connection available.</string>
+    <string name="feed_no_tweets">No Tweets matching your search. Try other keywords.</string>
 
 </resources>
