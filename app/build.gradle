@@ -38,6 +38,7 @@ dependencies {
     compile "com.twitter.sdk.android:tweet-ui:$TWITTER_VERSION"
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.miguelcatalan:materialsearchview:1.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

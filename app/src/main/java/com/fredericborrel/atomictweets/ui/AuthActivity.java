@@ -47,6 +47,7 @@ public class AuthActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Check if the user is already authenticated
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -62,6 +63,7 @@ public class AuthActivity extends AppCompatActivity {
             }
         };
 
+        // Handles the authorization response from Twitter
         mBinding.signInButton.setCallback(new Callback<TwitterSession>() {
             @Override
             public void success(Result<TwitterSession> result) {
@@ -91,6 +93,7 @@ public class AuthActivity extends AppCompatActivity {
         }
     }
 
+    // Tries to authenticate the user with a TwitterSession
     private void handleTwitterSession(final TwitterSession session) {
         Log.d(TAG, "handleTwitterSession:" + session);
 
@@ -100,6 +103,7 @@ public class AuthActivity extends AppCompatActivity {
                 session.getAuthToken().token,
                 session.getAuthToken().secret);
 
+        // Tries to authenticate the user and handle the response
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -125,6 +129,7 @@ public class AuthActivity extends AppCompatActivity {
         mBinding.signInButton.onActivityResult(requestCode, resultCode, data);
     }
 
+    // Starts the main activity
     private void launchMainActivity() {
         Intent mainActivity = new Intent(AuthActivity.this, TwitterFeedActivity.class);
         AuthActivity.this.startActivity(mainActivity);
@@ -132,6 +137,7 @@ public class AuthActivity extends AppCompatActivity {
         finish();
     }
 
+    // Shows the progress dialog
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);

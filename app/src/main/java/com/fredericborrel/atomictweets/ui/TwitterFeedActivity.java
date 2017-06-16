@@ -5,13 +5,13 @@ import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -22,6 +22,7 @@ import com.fredericborrel.atomictweets.databinding.ActivityFeedBinding;
 import com.fredericborrel.atomictweets.utils.NetworkUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.squareup.picasso.Picasso;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -33,7 +34,8 @@ import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class TwitterFeedActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, SwipeRefreshLayout.OnRefreshListener {
+public class TwitterFeedActivity extends AppCompatActivity implements
+        FragmentManager.OnBackStackChangedListener, SwipeRefreshLayout.OnRefreshListener {
 
     // Constants
     private static final String TAG = "TwitterFeedActivity";
@@ -49,6 +51,7 @@ public class TwitterFeedActivity extends AppCompatActivity implements FragmentMa
 
     // Twitter
     private TweetTimelineListAdapter mAdapter;
+    private SearchTimeline mTimeline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +62,28 @@ public class TwitterFeedActivity extends AppCompatActivity implements FragmentMa
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
         // Setup
-        setupDrawer();
-        setupRefreshListener();
-        setupTwitterTimeline();
-        setupActionBar();
+        initDrawer();
+        initRefreshListener();
+        setTwitterTimeline(DEFAULT_QUERY);
+        initSearchView();
+        initActionBar();
 
         // Listen to the BackStack to adapt the ActionBar
         getSupportFragmentManager().addOnBackStackChangedListener(this);
     }
 
     @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.mn_feed, menu);
+
+        MenuItem item = menu.findItem(R.id.action_search);
+        mBinding.searchView.setMenuItem(item);
+
+        return true;
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
         shouldDisplayHomeUp();
@@ -82,50 +96,11 @@ public class TwitterFeedActivity extends AppCompatActivity implements FragmentMa
         shouldDisplayHomeUp();
     }
 
-    @Override
-    public void onBackStackChanged() {
-        shouldDisplayHomeUp();
-    }
+    /******************************************************************************************
+     **     Set up components
+     ******************************************************************************************/
 
-    private void shouldDisplayHomeUp() {
-        boolean canGoBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
-        mDrawerToggle.setDrawerIndicatorEnabled(!canGoBack);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        getSupportFragmentManager().popBackStack();
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Activate the navigation mn_drawer toggle
-        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onRefresh() {
-        if (NetworkUtils.isNetworkAvailable(this)) {
-            mAdapter.refresh(new Callback<TimelineResult<Tweet>>() {
-                @Override
-                public void success(Result<TimelineResult<Tweet>> result) {
-                    mBinding.refreshLayout.setRefreshing(false);
-                }
-
-                @Override
-                public void failure(TwitterException exception) {
-                    mBinding.refreshLayout.setRefreshing(false);
-                    Toast.makeText(TwitterFeedActivity.this, getString(R.string.feed_unexpected_error), Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            Toast.makeText(this, getString(R.string.feed_network_not_available), Toast.LENGTH_LONG).show();
-            mBinding.refreshLayout.setRefreshing(false);
-        }
-    }
-
-    private void setupDrawer() {
+    private void initDrawer() {
         View header = mBinding.mainNavList.getHeaderView(0);
         TextView userNameMenu = (TextView) header.findViewById(R.id.menu_username);
         TextView emailMenu = (TextView) header.findViewById(R.id.menu_email);
@@ -171,28 +146,100 @@ public class TwitterFeedActivity extends AppCompatActivity implements FragmentMa
                 .into(profilePictureMenu);
     }
 
-    private void setupRefreshListener() {
+    private void initRefreshListener() {
         mBinding.refreshLayout.setOnRefreshListener(this);
     }
 
-    private void setupTwitterTimeline() {
-        SearchTimeline timeline = new SearchTimeline.Builder()
-                .query(DEFAULT_QUERY)
-                .languageCode(DEFAULT_LANGUAGE_CODE)
-                .build();
+    private void initSearchView() {
+        mBinding.searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                setTwitterTimeline(query);
+                return false;
+            }
 
-        mAdapter = new TweetTimelineListAdapter.Builder(this)
-                .setTimeline(timeline)
-                .build();
-
-        mBinding.lvTweets.setAdapter(mAdapter);
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
-    private void setupActionBar() {
+    private void initActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
     }
+
+    // No way to update dataset, so unfortunately, for time sake, I have to reinstantiate
+    // a timeline and an adapter. I also have no control over the emptiness of the listview
+    // or when the data is actually loaded.
+    private void setTwitterTimeline(String query) {
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            mTimeline = new SearchTimeline.Builder()
+                    .query(query)
+                    .languageCode(DEFAULT_LANGUAGE_CODE)
+                    .build();
+
+            mAdapter = new TweetTimelineListAdapter.Builder(this)
+                    .setTimeline(mTimeline)
+                    .build();
+            mBinding.lvTweets.setAdapter(mAdapter);
+        } else {
+            Toast.makeText(this, getString(R.string.feed_network_not_available), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /******************************************************************************************
+     **     Navigation
+     ******************************************************************************************/
+
+    @Override
+    public void onBackStackChanged() {
+        shouldDisplayHomeUp();
+    }
+
+    private void shouldDisplayHomeUp() {
+        boolean canGoBack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        mDrawerToggle.setDrawerIndicatorEnabled(!canGoBack);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        getSupportFragmentManager().popBackStack();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Activate the navigation mn_drawer toggle
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRefresh() {
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            mAdapter.refresh(new Callback<TimelineResult<Tweet>>() {
+                @Override
+                public void success(Result<TimelineResult<Tweet>> result) {
+                    mBinding.refreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void failure(TwitterException exception) {
+                    mBinding.refreshLayout.setRefreshing(false);
+                    Toast.makeText(TwitterFeedActivity.this, getString(R.string.feed_unexpected_error), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, getString(R.string.feed_network_not_available), Toast.LENGTH_LONG).show();
+            mBinding.refreshLayout.setRefreshing(false);
+        }
+    }
+
+    /******************************************************************************************
+     **     Authentication
+     ******************************************************************************************/
 
     // Sign out the user and send him back to the Authentication Activity
     private void signOut() {
