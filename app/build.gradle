@@ -27,13 +27,15 @@ dependencies {
     final SUPPORT_LIBRARY_VERSION = '25.3.1'
     final PLAY_SERVICES_VERSION = '11.0.0'
     final RETROFIT_VERSION = '2.1.0'
+    final TWITTER_VERSION = '3.0.0'
 
     compile "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
     compile "com.google.firebase:firebase-auth:$PLAY_SERVICES_VERSION"
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
     compile "com.squareup.retrofit2:converter-gson:$RETROFIT_VERSION"
-    compile 'com.twitter.sdk.android:twitter-core:3.0.0'
+    compile "com.twitter.sdk.android:twitter-core:$TWITTER_VERSION"
+    compile "com.twitter.sdk.android:tweet-ui:$TWITTER_VERSION"
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'de.hdodenhof:circleimageview:2.1.0'
 }

@@ -91,7 +91,7 @@ public class AuthActivity extends AppCompatActivity {
         }
     }
 
-    private void handleTwitterSession(TwitterSession session) {
+    private void handleTwitterSession(final TwitterSession session) {
         Log.d(TAG, "handleTwitterSession:" + session);
 
         showProgressDialog();
@@ -113,8 +113,8 @@ public class AuthActivity extends AppCompatActivity {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(AuthActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                            hideProgressDialog();
                         }
-                        hideProgressDialog();
                     }
                 });
     }
@@ -125,10 +125,10 @@ public class AuthActivity extends AppCompatActivity {
         mBinding.signInButton.onActivityResult(requestCode, resultCode, data);
     }
 
-
     private void launchMainActivity() {
-        Intent mainActivity = new Intent(AuthActivity.this, MainActivity.class);
+        Intent mainActivity = new Intent(AuthActivity.this, TwitterFeedActivity.class);
         AuthActivity.this.startActivity(mainActivity);
+        hideProgressDialog();
         finish();
     }
 
@@ -144,7 +144,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
         }
     }
 }

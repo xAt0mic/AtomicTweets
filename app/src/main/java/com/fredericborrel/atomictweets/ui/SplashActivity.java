@@ -12,9 +12,6 @@ import com.twitter.sdk.android.core.Twitter;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final String TWITTER_CONSUMER_KEY = "SlxIi97nBEC5MEKRLUfH6BhSy";
-    private static final String TWITTER_CONSUMER_SECRET = "LWLhdQJ6dfPQCy5v4hvS0JxKeaJhlVIbqcx1fsTuvGxEui1tdh";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

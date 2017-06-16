@@ -8,63 +8,64 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fredericborrel.atomictweets.R;
-import com.fredericborrel.atomictweets.databinding.ActivityMainBinding;
+import com.fredericborrel.atomictweets.databinding.ActivityFeedBinding;
+import com.fredericborrel.atomictweets.utils.NetworkUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.tweetui.SearchTimeline;
+import com.twitter.sdk.android.tweetui.TimelineResult;
+import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener {
+public class TwitterFeedActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, SwipeRefreshLayout.OnRefreshListener {
 
     // Constants
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "TwitterFeedActivity";
+    private static final String DEFAULT_LANGUAGE_CODE = "en";
+    private static final String DEFAULT_QUERY = "Android";
 
     // FireBase
     private FirebaseUser mUser;
 
     // GUI
     private ActionBarDrawerToggle mDrawerToggle;
-    private ActivityMainBinding mBinding;
+    private ActivityFeedBinding mBinding;
+
+    // Twitter
+    private TweetTimelineListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_feed);
 
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Setup the mn_drawer menu
+        // Setup
         setupDrawer();
-
-        // Setup the ActionBar
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
+        setupRefreshListener();
+        setupTwitterTimeline();
+        setupActionBar();
 
         // Listen to the BackStack to adapt the ActionBar
         getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        if (mBinding.mainFragmentContainer != null) {
-            if (savedInstanceState != null) {
-                return;
-            }
-
-            TwitterFeedFragment feedFragment = new TwitterFeedFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(mBinding.mainFragmentContainer.getId(), feedFragment)
-                    .commit();
-        }
     }
 
     @Override
@@ -103,8 +104,28 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
-    private void setupDrawer() {
+    @Override
+    public void onRefresh() {
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            mAdapter.refresh(new Callback<TimelineResult<Tweet>>() {
+                @Override
+                public void success(Result<TimelineResult<Tweet>> result) {
+                    mBinding.refreshLayout.setRefreshing(false);
+                }
 
+                @Override
+                public void failure(TwitterException exception) {
+                    mBinding.refreshLayout.setRefreshing(false);
+                    Toast.makeText(TwitterFeedActivity.this, getString(R.string.feed_unexpected_error), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, getString(R.string.feed_network_not_available), Toast.LENGTH_LONG).show();
+            mBinding.refreshLayout.setRefreshing(false);
+        }
+    }
+
+    private void setupDrawer() {
         View header = mBinding.mainNavList.getHeaderView(0);
         TextView userNameMenu = (TextView) header.findViewById(R.id.menu_username);
         TextView emailMenu = (TextView) header.findViewById(R.id.menu_email);
@@ -150,11 +171,34 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                 .into(profilePictureMenu);
     }
 
+    private void setupRefreshListener() {
+        mBinding.refreshLayout.setOnRefreshListener(this);
+    }
+
+    private void setupTwitterTimeline() {
+        SearchTimeline timeline = new SearchTimeline.Builder()
+                .query(DEFAULT_QUERY)
+                .languageCode(DEFAULT_LANGUAGE_CODE)
+                .build();
+
+        mAdapter = new TweetTimelineListAdapter.Builder(this)
+                .setTimeline(timeline)
+                .build();
+
+        mBinding.lvTweets.setAdapter(mAdapter);
+    }
+
+    private void setupActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+    }
+
     // Sign out the user and send him back to the Authentication Activity
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
-        Intent authActivity = new Intent(MainActivity.this, AuthActivity.class);
-        MainActivity.this.startActivity(authActivity);
+        Intent authActivity = new Intent(TwitterFeedActivity.this, AuthActivity.class);
+        TwitterFeedActivity.this.startActivity(authActivity);
         finish();
     }
 }

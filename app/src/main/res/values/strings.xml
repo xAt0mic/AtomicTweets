@@ -18,5 +18,11 @@
     <string name="menu_sign_out">Sign Out</string>
     <string name="menu_open">Open navigation drawer</string>
     <string name="menu_close">Close navigation drawer</string>
+    <string name="menu_search">Search Keyword</string>
+
+    <!-- Feed -->
+    <string name="feed_network_not_available">Oops, we cannot reach Twitter. Please check your internet connection.</string>
+    <string name="feed_unexpected_error">Oops, something went wrong.</string>
+    <string name="feed_no_tweets">No Tweets.</string>
 
 </resources>

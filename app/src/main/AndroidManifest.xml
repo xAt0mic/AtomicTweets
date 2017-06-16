@@ -25,7 +25,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/NoActionBarTheme"/>
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.TwitterFeedActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing"/>
     </application>
